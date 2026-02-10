@@ -1,42 +1,1122 @@
 [
   {
-    "id": "js-closure-1",
+    "id": "http-001",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "HTTP методы: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS — что делают?",
+    "answer": "HTTP-метод = «что сделать с ресурсом» (/users/42).\nGET — получить (не меняет сервер).\nPOST — создать/выполнить действие.\nPUT — полностью заменить ресурс.\nPATCH — частично изменить.\nDELETE — удалить.\nHEAD — как GET, но без body.\nOPTIONS — какие методы/настройки доступны (часто CORS preflight).",
+    "tags": ["http", "methods", "rest"]
+  },
+  {
+    "id": "http-002",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "GET vs POST — ключевые отличия?",
+    "answer": "GET: данные обычно в URL (query), должен быть safe, легко кешируется, URL попадает в историю/логи/закладки → секреты не передают.\nPOST: данные в body (JSON/form-data), часто создание/действия, обычно не кешируется по умолчанию, лучше для больших payload.",
+    "tags": ["http", "get", "post"]
+  },
+  {
+    "id": "http-003",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "Идемпотентность в HTTP — что это и какие методы идемпотентны?",
+    "answer": "Идемпотентный запрос можно повторить много раз, и состояние сервера будет таким же, как после первого.\nОбычно: GET, PUT, DELETE, HEAD, OPTIONS.\nОбычно НЕ: POST (2 раза → 2 ресурса).\nНюанс: POST делают условно идемпотентным через idempotency-key (например, платежи).",
+    "tags": ["http", "idempotency"]
+  },
+  {
+    "id": "http-004",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "Из чего состоит HTTP Request и HTTP Response?",
+    "answer": "Request: стартовая строка (METHOD + path + version), headers (Host/Accept/Content-Type/Authorization/Cookie…), body (POST/PUT/PATCH).\nResponse: статус-строка (version + code), headers (Content-Type/Cache-Control/Set-Cookie/Location…), body (данные) или пусто.",
+    "tags": ["http", "request", "response", "headers"]
+  },
+  {
+    "id": "http-005",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "HTTP/1.1 vs HTTP/2 vs HTTP/3 — отличия?",
+    "answer": "HTTP/1.1: запросы по соединению последовательно, Head-of-Line blocking, текстовый протокол, браузеры открывают несколько TCP-соединений.\nHTTP/2: мультиплексирование по одному соединению, HPACK (сжатие заголовков), бинарный протокол.\nHTTP/3: QUIC поверх UDP, быстрее установление соединения, лучше на мобильных сетях, меньше проблем из-за потерь пакетов.",
+    "tags": ["http", "http2", "http3"]
+  },
+  {
+    "id": "http-006",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "HTTPS/TLS — что даёт и как работает handshake (упрощённо)?",
+    "answer": "HTTPS = HTTP + TLS. TLS: шифрование, целостность, аутентификация.\nHandshake: клиент предлагает алгоритмы → сервер отдаёт сертификат → клиент проверяет CA/домен/срок → согласование ключей → дальше трафик шифруется.\nПочему обязателен: защита cookie/заголовков/целостности контента и доступ к browser API.",
+    "tags": ["https", "tls", "security"]
+  },
+  {
+    "id": "http-007",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "HTTP status codes: 2xx/3xx/4xx/5xx — что важно знать?",
+    "answer": "2xx: 200 OK, 201 Created, 204 No Content.\n3xx: 301, 302, 304 Not Modified (кеш).\n4xx: 400, 401, 403, 404, 409, 422.\n5xx: 500, 502, 503.\nПринцип: код отражает результат, body поясняет детали.",
+    "tags": ["http", "status-codes"]
+  },
+  {
+    "id": "http-008",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "REST — что это и основные принципы?",
+    "answer": "REST — архитектурный стиль API: работа с ресурсами через HTTP по назначению.\nПринципы: ресурсы и URL (/users/42), методы отражают действие, stateless (каждый запрос содержит всё), единый интерфейс (коды, форматы, понятные URL).\nREST ≠ обязательно CRUD, CRUD — частый кейс.",
+    "tags": ["rest", "api"]
+  },
+  {
+    "id": "http-009",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "URI vs URL и структура URL (scheme/host/port/path/query/fragment)?",
+    "answer": "URI — любой идентификатор ресурса. URL — частный случай URI: где и как получить ресурс.\nURL: scheme + host + port + path + query + fragment.\nQuery участвует в запросе; fragment (#) на сервер не отправляется (обрабатывает браузер).",
+    "tags": ["uri", "url"]
+  },
+  {
+    "id": "http-010",
+    "topicId": "http",
+    "topicTitle": "HTTP / REST",
+    "question": "Headers — что это и зачем важны?",
+    "answer": "Headers управляют поведением запроса/ответа: формат (Content-Type/Accept), авторизация (Authorization), cookie, кеш (Cache-Control/ETag), безопасность (CORS headers), редиректы (Location).",
+    "tags": ["http", "headers"]
+  },
+
+  {
+    "id": "sec-001",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "CORS: что это и что такое origin?",
+    "answer": "CORS — механизм безопасности браузера для доступа JS между разными origin.\nOrigin = protocol + domain + port. Если отличается хоть одно — origin другой.\nВажно: CORS — ограничение браузера, а не «серверная защита».",
+    "tags": ["cors", "origin", "security"]
+  },
+  {
+    "id": "sec-002",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "Preflight (OPTIONS): что это и когда появляется?",
+    "answer": "Preflight — предварительный OPTIONS-запрос браузера перед основным.\nПоявляется при «не simple» запросах: методы кроме GET/POST, custom headers, JSON Content-Type (application/json) и т.д.\nОтвет сервера должен содержать Allow-Origin/Methods/Headers — иначе основной запрос не пойдёт.",
+    "tags": ["cors", "options", "preflight"]
+  },
+  {
+    "id": "sec-003",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "Как правильно чинят CORS и что не делать?",
+    "answer": "Правильно: настраивать сервер (Access-Control-Allow-Origin/Methods/Headers/Credentials).\nНельзя: mode:'no-cors', сторонние прокси «лишь бы работало», отключать CORS в браузере.\nНюанс: при credentials нельзя ставить '*', origin должен быть конкретным.",
+    "tags": ["cors", "server", "security"]
+  },
+  {
+    "id": "sec-004",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "Cookie: что это и чем отличается от localStorage?",
+    "answer": "Cookie — маленькие данные, которые сервер сохраняет в браузере; браузер автоматически отправляет cookie с запросами к домену.\nlocalStorage не отправляется автоматически — только через JS.",
+    "tags": ["cookies", "localstorage"]
+  },
+  {
+    "id": "sec-005",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "Cookie flags: HttpOnly/Secure/SameSite — смысл?",
+    "answer": "HttpOnly: cookie недоступна из JS → защита от кражи при XSS.\nSecure: только HTTPS.\nSameSite: ограничение межсайтовой отправки cookie (Strict/Lax/None). SameSite=None требует Secure.",
+    "tags": ["cookies", "httponly", "samesite"]
+  },
+  {
+    "id": "sec-006",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "Какой размер cookie и почему нельзя хранить большие данные?",
+    "answer": "~4KB на cookie, и лимит по количеству на домен. Cookie уходят с каждым HTTP-запросом → большие cookie замедляют сеть. Cookie — идентификатор, не хранилище.",
+    "tags": ["cookies", "limits"]
+  },
+  {
+    "id": "sec-007",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "Cookie vs LocalStorage по безопасности. Где хранить auth?",
+    "answer": "Cookie + HttpOnly + Secure — безопасная классика для auth.\nLocalStorage доступен из JS → уязвим к XSS, для токенов риск.\nJWT в localStorage — плохо при любой XSS.",
+    "tags": ["cookies", "auth", "xss"]
+  },
+  {
+    "id": "sec-008",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "XSS: что это, виды и защита?",
+    "answer": "XSS — внедрение JS-кода на страницу.\nТипы: Stored, Reflected, DOM-based.\nЗащита: экранирование, не использовать innerHTML с пользовательскими данными, HttpOnly cookie, CSP.",
+    "tags": ["xss", "security"]
+  },
+  {
+    "id": "sec-009",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "CSRF: что это и как защищаются?",
+    "answer": "CSRF — атака, где браузер жертвы отправляет запрос на доверенный сайт из-за авто-прикрепления cookie.\nЗащита: CSRF token, SameSite, Origin/Referer check, иногда Authorization header.\nРазница: XSS = выполнение кода, CSRF = отправка запроса.",
+    "tags": ["csrf", "security"]
+  },
+  {
+    "id": "sec-010",
+    "topicId": "security",
+    "topicTitle": "Web Security (CORS/Cookies/XSS/CSRF)",
+    "question": "Same-origin policy: что ограничивает и как связан с CORS?",
+    "answer": "Same-origin policy: JS свободно работает только в том же origin (protocol/domain/port). Ограничивает доступ к ответам fetch, DOM чужих iframe, cookies, localStorage.\nCORS — механизм исключений: сервер явно разрешает origin.",
+    "tags": ["same-origin", "cors"]
+  },
+
+  {
+    "id": "cache-001",
+    "topicId": "cache",
+    "topicTitle": "HTTP Cache",
+    "question": "Cache-Control: что это и ключевые директивы?",
+    "answer": "Cache-Control управляет кешированием.\nno-store — не сохранять вообще.\nno-cache — можно хранить, но перепроверять.\nmax-age=N — срок валидности.\npublic — кеш где угодно (включая CDN).\nprivate — только браузер.",
+    "tags": ["cache", "http"]
+  },
+  {
+    "id": "cache-002",
+    "topicId": "cache",
+    "topicTitle": "HTTP Cache",
+    "question": "ETag и Last-Modified: как работает валидация кеша и зачем 304?",
+    "answer": "Last-Modified + If-Modified-Since и ETag + If-None-Match — условные запросы.\nЕсли ресурс не изменился → 304 Not Modified, тело не передаётся → быстрее и экономит трафик.\nETag обычно точнее, Last-Modified проще; часто используют оба.",
+    "tags": ["cache", "etag", "last-modified"]
+  },
+  {
+    "id": "cache-003",
+    "topicId": "cache",
+    "topicTitle": "HTTP Cache",
+    "question": "Как правильно запретить кеш (правильно vs костыль)?",
+    "answer": "Правильно (сервер): Cache-Control: no-store, no-cache, must-revalidate + Pragma: no-cache.\nКостыль: добавлять random/ts параметр в URL — ломает CDN и засоряет URL.",
+    "tags": ["cache", "headers"]
+  },
+  {
+    "id": "cache-004",
+    "topicId": "cache",
+    "topicTitle": "HTTP Cache",
+    "question": "Жизненный цикл взаимодействия клиента с сервером (упрощённо)?",
+    "answer": "Действие пользователя → браузер формирует запрос → проверка кеша (валиден/нет) → сеть → сервер (логика/БД) → ответ → браузер читает headers и решает кешировать/нет → JS получает данные → UI обновляется.",
+    "tags": ["browser", "http"]
+  },
+
+  {
+    "id": "js-001",
     "topicId": "js",
-    "topicTitle": "JavaScript",
-    "question": "Что такое замыкание?",
-    "answer": "Замыкание — это функция вместе с окружением (лексической областью видимости), в котором она была создана. Благодаря этому функция может обращаться к переменным из внешней области даже после завершения внешней функции.",
-    "tags": ["functions", "scope"]
+    "topicTitle": "JavaScript Core",
+    "question": "Типы данных в JavaScript: какие есть и ключевая разница примитивов и объектов?",
+    "answer": "7 примитивов: number, string, boolean, null, undefined, symbol, bigint.\nСсылочный тип: object (объекты/массивы/функции/даты…).\nПримитивы: по значению, иммутабельны.\nОбъекты: по ссылке, мутабельны.",
+    "tags": ["js", "types"]
   },
   {
-    "id": "js-this-1",
+    "id": "js-002",
     "topicId": "js",
-    "topicTitle": "JavaScript",
-    "question": "Как работает this в JavaScript?",
-    "answer": "this определяется способом вызова функции (call-site). В обычной функции: зависит от контекста вызова; в стрелочной: this берётся из внешней области (лексически). Методы call/apply/bind позволяют задать this явно.",
-    "tags": ["this", "functions"]
+    "topicTitle": "JavaScript Core",
+    "question": "null vs undefined — в чём смысловая разница? Почему typeof null === 'object'?",
+    "answer": "undefined — значение не присвоено (часто ставит движок).\nnull — «пусто намеренно» (ставит разработчик).\nПрактически: undefined = «ещё нет», null = «было, стало пусто».\ntypeof null === 'object' — исторический баг ради совместимости.",
+    "tags": ["js", "null", "undefined"]
   },
   {
-    "id": "react-keys-1",
-    "topicId": "react",
-    "topicTitle": "React",
-    "question": "Зачем нужны keys в списках?",
-    "answer": "Keys помогают React сопоставлять элементы между рендерами и эффективно обновлять DOM. Ключ должен быть стабильным и уникальным (например id), чтобы избежать лишних перемонтирований и багов состояния.",
-    "tags": ["lists", "reconciliation"]
+    "id": "js-003",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "NaN: что это и как правильно проверять?",
+    "answer": "NaN — результат некорректной числовой операции. Особенность: NaN !== NaN.\nПравильная проверка: Number.isNaN(value). Не сравнивать с NaN через ===.",
+    "tags": ["js", "nan"]
   },
   {
-    "id": "ts-never-1",
-    "topicId": "ts",
-    "topicTitle": "TypeScript",
-    "question": "Что такое never и где полезен?",
-    "answer": "never — тип для значений, которые никогда не происходят (ошибка/бесконечный цикл). Полезен для exhaustiveness-check в switch по union и для функций, которые всегда бросают ошибку.",
-    "tags": ["types", "unions"]
+    "id": "js-004",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "isNaN() vs Number.isNaN() — разница?",
+    "answer": "isNaN(value) сначала приводит к числу и проверяет результат (часто неожиданно).\nNumber.isNaN(value) НЕ приводит тип и true только если значение реально NaN.\nВ реальном коде — Number.isNaN.",
+    "tags": ["js", "nan"]
   },
   {
-    "id": "webpack-loaders-1",
-    "topicId": "webpack",
-    "topicTitle": "Webpack",
-    "question": "Зачем нужны loaders в Webpack?",
-    "answer": "Loaders преобразуют файлы до того, как они попадут в бандл: например, TS/JS через babel/ts-loader, CSS через css-loader, изображения через asset modules и т.д.",
-    "tags": ["bundling", "build"]
+    "id": "js-005",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "Number.isFinite() — что проверяет и зачем?",
+    "answer": "Проверяет, что значение — конечное число без приведения типов. Полезно для валидации и защиты от Infinity/NaN. Глобальный isFinite приводит тип и хуже.",
+    "tags": ["js", "numbers"]
+  },
+  {
+    "id": "js-006",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "Array.isArray() — почему так, и почему instanceof Array хуже?",
+    "answer": "typeof [] === 'object', поэтому typeof не подходит.\nArray.isArray(value) — стандартный безопасный способ.\ninstanceof Array может ломаться между разными execution context (например, iframe).",
+    "tags": ["js", "array"]
+  },
+  {
+    "id": "js-007",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "== vs === — в чём опасность == и когда его иногда допускают?",
+    "answer": "=== не приводит типы.\n== приводит типы по сложным правилам → баги и плохая читаемость.\nРедкий допустимый кейс: value == null (проверка null или undefined), но даже это спорно.",
+    "tags": ["js", "equality"]
+  },
+  {
+    "id": "js-008",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "Type coercion: где и как происходит приведение типов?",
+    "answer": "Автоприведение в арифметике (+ - * /), сравнениях (==), логике (! && ||), условиях if.\nПравило: + со строкой → конкатенация, остальные арифметические → к числу.",
+    "tags": ["js", "coercion"]
+  },
+  {
+    "id": "js-009",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "Truthy/Falsy: какие значения falsy в JS?",
+    "answer": "Falsy: false, 0, -0, '' (пустая строка), null, undefined, NaN. Всё остальное truthy.\nТипичные ошибки: путать '0' и 0, [] и false.",
+    "tags": ["js", "truthy-falsy"]
+  },
+  {
+    "id": "js-010",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "var / let / const — различия и что использовать?",
+    "answer": "var: function scope, hoisting с undefined, можно переобъявлять (устаревшее).\nlet: block scope, TDZ, можно переassign.\nconst: block scope, нужен initial value, нельзя переassign (но объект можно мутировать).\nРекомендация: const по умолчанию, let когда нужно, var не использовать.",
+    "tags": ["js", "scope"]
+  },
+  {
+    "id": "js-011",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "Scope: global/function/block и что такое scope chain?",
+    "answer": "Scope — где переменная доступна.\nGlobal — везде (плохо засоряет).\nFunction scope — внутри функции (var).\nBlock scope — внутри {} (let/const).\nScope chain: поиск переменной идёт из текущего scope вверх до global; если не нашли — ReferenceError.",
+    "tags": ["js", "scope"]
+  },
+  {
+    "id": "js-012",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "Hoisting: что поднимается и чем отличаются function/var/let/const?",
+    "answer": "Поднимаются объявления, не значения.\nFunction Declaration — поднимается целиком.\nvar — поднимается объявление, значение сначала undefined.\nlet/const — тоже поднимаются, но в TDZ: доступ до инициализации запрещён (ReferenceError).",
+    "tags": ["js", "hoisting", "tdz"]
+  },
+  {
+    "id": "js-013",
+    "topicId": "js",
+    "topicTitle": "JavaScript Core",
+    "question": "TDZ (Temporal Dead Zone) — что это и зачем?",
+    "answer": "TDZ — период от входа в scope до инициализации let/const. Любое обращение в TDZ → ReferenceError.\nЗачем: запретить использование переменной до объявления и сделать код предсказуемее.",
+    "tags": ["js", "tdz"]
+  },
+
+  {
+    "id": "obj-001",
+    "topicId": "objects",
+    "topicTitle": "Objects / Copying",
+    "question": "Почему объекты сравниваются по ссылке, а не по содержимому?",
+    "answer": "Объекты сравниваются по ссылке (участок памяти). Два разных объекта с одинаковыми полями не равны. Равны только если обе переменные указывают на один и тот же объект.",
+    "tags": ["js", "objects"]
+  },
+  {
+    "id": "obj-002",
+    "topicId": "objects",
+    "topicTitle": "Objects / Copying",
+    "question": "Shallow copy: что это и в чём ловушка?",
+    "answer": "Shallow copy копирует примитивы по значению, а вложенные объекты по ссылке. Поэтому изменение вложенности в копии меняет оригинал (общая ссылка).",
+    "tags": ["js", "copy"]
+  },
+  {
+    "id": "obj-003",
+    "topicId": "objects",
+    "topicTitle": "Objects / Copying",
+    "question": "Deep copy: способы и ограничения JSON.stringify/structuredClone?",
+    "answer": "JSON.parse(JSON.stringify()) не копирует Date/Map/Set/undefined/Symbol/функции, ломается на циклах.\nstructuredClone поддерживает Date/Map/Set и вложенности, но не копирует функции.",
+    "tags": ["js", "copy"]
+  },
+  {
+    "id": "obj-004",
+    "topicId": "objects",
+    "topicTitle": "Objects / Copying",
+    "question": "Почему const не делает объект неизменяемым? Что даёт Object.freeze?",
+    "answer": "const запрещает переприсваивание переменной, но не мутацию объекта.\nObject.freeze делает shallow freeze: вложенные объекты всё ещё можно менять без deep-freeze.",
+    "tags": ["js", "immutability"]
+  },
+
+  {
+    "id": "proto-001",
+    "topicId": "prototype",
+    "topicTitle": "Prototype",
+    "question": "Prototype: что это и как JS ищет методы (пример с массивом)?",
+    "answer": "У объекта есть скрытое [[Prototype]]: если свойство не найдено в объекте, JS ищет его в прототипе (например, push лежит в Array.prototype). Это делегирование, не копирование.",
+    "tags": ["js", "prototype"]
+  },
+  {
+    "id": "proto-002",
+    "topicId": "prototype",
+    "topicTitle": "Prototype",
+    "question": "Prototype chain: как выглядит и когда поиск останавливается?",
+    "answer": "Цепочка: arr → Array.prototype → Object.prototype → null.\nПоиск останавливается, когда свойство найдено или прототип = null.",
+    "tags": ["js", "prototype", "chain"]
+  },
+  {
+    "id": "proto-003",
+    "topicId": "prototype",
+    "topicTitle": "Prototype",
+    "question": "Как работает new (4 шага) и какой нюанс с return объекта?",
+    "answer": "new делает: 1) создаёт пустой объект 2) связывает его прототип с Function.prototype 3) вызывает конструктор с this=объект 4) возвращает объект.\nЕсли конструктор явно вернул объект — вернётся он.",
+    "tags": ["js", "new", "prototype"]
+  },
+
+  {
+    "id": "mapset-001",
+    "topicId": "mapset",
+    "topicTitle": "Map/Set/Weak",
+    "question": "Map vs Object — ключи, порядок, производительность и риски прототипа?",
+    "answer": "Object: ключи строки/Symbol, порядок с нюансами, есть прототип (опасные ключи типа toString).\nMap: ключи любого типа, порядок вставки гарантирован, удобнее для больших коллекций и частых insert/delete/lookup.",
+    "tags": ["js", "map", "object"]
+  },
+  {
+    "id": "mapset-002",
+    "topicId": "mapset",
+    "topicTitle": "Map/Set/Weak",
+    "question": "Set: что это и почему полезен (SameValueZero, NaN==NaN)?",
+    "answer": "Set — коллекция уникальных значений. Внутри сравнение SameValueZero: как ===, но NaN считается равным NaN.\nПолезно для membership check (has) и удаления дублей.",
+    "tags": ["js", "set"]
+  },
+  {
+    "id": "mapset-003",
+    "topicId": "mapset",
+    "topicTitle": "Map/Set/Weak",
+    "question": "WeakMap: в чём смысл «слабых» ключей и почему нет итерации?",
+    "answer": "WeakMap: ключи только объекты и они «слабые» — не удерживают объект от GC. Если больше ссылок нет, GC может удалить.\nИтерации нет, потому что ключи могут исчезать в любой момент.",
+    "tags": ["js", "weakmap", "gc"]
+  },
+  {
+    "id": "mapset-004",
+    "topicId": "mapset",
+    "topicTitle": "Map/Set/Weak",
+    "question": "WeakSet: зачем и какие ограничения?",
+    "answer": "WeakSet хранит только объекты, тоже «слабые» для GC, итерации нет.\nПолезно для «пометить обработанные объекты» без утечек памяти.",
+    "tags": ["js", "weakset", "gc"]
+  },
+  {
+    "id": "sym-001",
+    "topicId": "symbols",
+    "topicTitle": "Symbol / Boxing",
+    "question": "Symbol: что это и зачем нужен?",
+    "answer": "Symbol — примитив, который всегда уникален.\nИспользуют: уникальные ключи объектов (не перетираются), «скрытые» свойства (не в Object.keys/for..in, не в JSON), встроенные символы (Symbol.iterator и др.).",
+    "tags": ["js", "symbol"]
+  },
+  {
+    "id": "sym-002",
+    "topicId": "symbols",
+    "topicTitle": "Symbol / Boxing",
+    "question": "Boxing/Unboxing: почему у примитивов есть методы?",
+    "answer": "При вызове методов у примитива JS создаёт временный объект-обёртку (String/Number/Boolean), вызывает метод и уничтожает объект. Поэтому нельзя хранить состояние как свойства примитива — оно «исчезнет».",
+    "tags": ["js", "boxing"]
+  },
+  {
+    "id": "sym-003",
+    "topicId": "symbols",
+    "topicTitle": "Symbol / Boxing",
+    "question": "Почему new String()/new Number()/new Boolean() — плохо?",
+    "answer": "Они создают объект, а не примитив: typeof = 'object', ломают сравнение и truthy (объект всегда true), создают лишнюю нагрузку на память/GC.",
+    "tags": ["js", "wrappers"]
+  },
+
+  {
+    "id": "gc-001",
+    "topicId": "gc",
+    "topicTitle": "GC / Memory",
+    "question": "Garbage Collector: главный принцип достижимости?",
+    "answer": "GC удаляет недостижимые объекты. Если нет пути от корней (global, локальные активных функций, замыкания) — объект может быть удалён.",
+    "tags": ["js", "gc"]
+  },
+  {
+    "id": "gc-002",
+    "topicId": "gc",
+    "topicTitle": "GC / Memory",
+    "question": "Почему возникают memory leaks во фронте (типичные причины)?",
+    "answer": "Часто: не снятые event listeners, не очищенные setInterval/setTimeout, замыкания удерживают большие данные, хранение DOM-нод в JS после удаления из DOM.",
+    "tags": ["js", "memory-leak"]
+  },
+  {
+    "id": "gc-003",
+    "topicId": "gc",
+    "topicTitle": "GC / Memory",
+    "question": "Как избегать утечек памяти (практические правила)?",
+    "answer": "Чистить removeEventListener, clearInterval/clearTimeout, аккуратно с замыканиями и большими данными, использовать WeakMap/WeakSet для метаданных, обнулять ссылки, следить за жизненным циклом компонентов.",
+    "tags": ["js", "memory-leak"]
+  },
+
+  {
+    "id": "fn-001",
+    "topicId": "functions",
+    "topicTitle": "Functions / Context",
+    "question": "Function Declaration vs Function Expression — разница и hoisting?",
+    "answer": "Declaration поднимается целиком → можно вызывать до объявления.\nExpression — функция создаётся как значение, hoisting только для переменной (а let/const ещё и в TDZ) → до инициализации вызвать нельзя.",
+    "tags": ["js", "functions", "hoisting"]
+  },
+  {
+    "id": "fn-002",
+    "topicId": "functions",
+    "topicTitle": "Functions / Context",
+    "question": "Анонимные функции: зачем и какие минусы?",
+    "answer": "Чаще как коллбеки. Минусы: сложнее дебажить (anonymous в стеке), хуже переиспользование. Если нужна повторно — лучше именовать.",
+    "tags": ["js", "functions"]
+  },
+  {
+    "id": "fn-003",
+    "topicId": "functions",
+    "topicTitle": "Functions / Context",
+    "question": "Arrow functions: главные отличия (this/arguments/new)?",
+    "answer": "У стрелок нет своего this (берут внешний), нет arguments (используй rest), нельзя вызывать с new (нет prototype). Хороши для коллбеков; методы объекта часто лучше обычной функцией.",
+    "tags": ["js", "arrow", "this"]
+  },
+  {
+    "id": "fn-004",
+    "topicId": "functions",
+    "topicTitle": "Functions / Context",
+    "question": "IIFE: что это и зачем (и актуально ли сейчас)?",
+    "answer": "IIFE — функция, которая создаётся и сразу вызывается. Раньше — изоляция scope до модулей. Сейчас реже (ES modules, let/const), но встречается в старом коде/скриптах.",
+    "tags": ["js", "iife"]
+  },
+  {
+    "id": "fn-005",
+    "topicId": "functions",
+    "topicTitle": "Functions / Context",
+    "question": "Замыкание (closure): что это и где используется?",
+    "answer": "Функция «помнит» переменные внешнего scope даже после завершения внешней функции. Используется: счётчики, кеш, приватные переменные, фабрики функций, обработчики. Может удерживать память → риск утечек.",
+    "tags": ["js", "closure"]
+  },
+  {
+    "id": "fn-006",
+    "topicId": "functions",
+    "topicTitle": "Functions / Context",
+    "question": "setTimeout и «перезапись» переменной: в чём суть проблемы замыкания?",
+    "answer": "setTimeout сохраняет доступ к переменной (ссылку), а не снимок значения. К моменту выполнения переменная могла измениться — это ожидаемое следствие замыканий и асинхронности.",
+    "tags": ["js", "closure", "async"]
+  },
+  {
+    "id": "fn-007",
+    "topicId": "functions",
+    "topicTitle": "Functions / Context",
+    "question": "Рекурсия: из чего состоит и когда оправдана?",
+    "answer": "Нужно base case + шаг рекурсии. Хороша для деревьев/иерархий (DOM/структуры). Минусы: нагрузка на стек, риск Maximum call stack size exceeded. Простые задачи чаще циклом.",
+    "tags": ["js", "recursion"]
+  },
+  {
+    "id": "this-001",
+    "topicId": "this",
+    "topicTitle": "this / bind / call / apply",
+    "question": "this: как определяется и базовые случаи вызова?",
+    "answer": "this определяется в момент вызова, не в момент объявления. Обычный вызов: window (или undefined в strict). Вызов как метод obj.method(): this = obj. У стрелок this берётся из внешнего контекста.",
+    "tags": ["js", "this"]
+  },
+  {
+    "id": "this-002",
+    "topicId": "this",
+    "topicTitle": "this / bind / call / apply",
+    "question": "Потеря контекста this: когда происходит и почему?",
+    "answer": "Когда метод «отрывается» от объекта (передали в коллбек/таймер/промис/переменную/destructuring). Нет объекта слева от точки → this становится window/undefined (strict).",
+    "tags": ["js", "this"]
+  },
+  {
+    "id": "this-003",
+    "topicId": "this",
+    "topicTitle": "this / bind / call / apply",
+    "question": "Как контролировать this: bind/call/apply/arrow — отличия?",
+    "answer": "bind: возвращает новую функцию с фиксированным this.\ncall: вызывает сразу, this + аргументы через запятую.\napply: как call, но аргументы массивом.\nArrow: не имеет своего this, берёт внешний.",
+    "tags": ["js", "this", "bind", "call", "apply"]
+  },
+
+  {
+    "id": "fnadv-001",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "bind/call/apply — концептуально в чём разница?",
+    "answer": "bind — подготовка: возвращает новую функцию, this фиксируется.\ncall/apply — немедленный вызов с явным this.\nРазница call vs apply — только в форме передачи аргументов.",
+    "tags": ["js", "this", "bind"]
+  },
+  {
+    "id": "fnadv-002",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "arguments vs rest parameters (...args) — что лучше и почему?",
+    "answer": "arguments — псевдомассив в обычных функциях, неудобен, нет в стрелках.\nrest (...args) — настоящий массив, читаемо, работает в стрелках. В современном коде — rest.",
+    "tags": ["js", "rest", "arguments"]
+  },
+  {
+    "id": "fnadv-003",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "Default parameters: почему лучше, чем x = x || 10?",
+    "answer": "Default применяется только если аргумент не передан или undefined и не затирает 0/false/'' как старый x||10. Значение вычисляется в момент вызова.",
+    "tags": ["js", "defaults"]
+  },
+  {
+    "id": "fnadv-004",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "Деструктуризация: концепция и где полезна?",
+    "answer": "Извлекает значения из объектов/массивов явно и читаемо. Массив — важен порядок, объект — имена свойств. Полезна в аргументах функций, API-данных, React хуках/компонентах.",
+    "tags": ["js", "destructuring"]
+  },
+  {
+    "id": "fnadv-005",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "Spread vs Rest — в чём логика направления?",
+    "answer": "Rest: «собрать» много значений в одну переменную (объявление).\nSpread: «развернуть» одно значение в много (использование).",
+    "tags": ["js", "spread", "rest"]
+  },
+  {
+    "id": "fnadv-006",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "Функции высшего порядка: что это и зачем?",
+    "answer": "Принимают функцию и/или возвращают функцию. Основа map/filter/reduce, обработчиков, middleware. Это практический инструмент снижения дублирования и управления сложностью.",
+    "tags": ["js", "hof"]
+  },
+  {
+    "id": "fnadv-007",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "Чистые функции: критерии и зачем во фронте?",
+    "answer": "Одинаковые входы → одинаковый выход, без побочных эффектов. Легче тестировать и предсказуемы. Часто в reducers/selectors и трансформации данных.",
+    "tags": ["js", "pure-function"]
+  },
+  {
+    "id": "fnadv-008",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "Каррирование: что это и зачем?",
+    "answer": "Функция с несколькими аргументами превращается в цепочку функций по одному аргументу. Даёт частичное применение, переиспользование «настроенных» функций, композицию.",
+    "tags": ["js", "currying"]
+  },
+  {
+    "id": "fnadv-009",
+    "topicId": "functions-advanced",
+    "topicTitle": "Functions Advanced",
+    "question": "Мемоизация: идея, когда полезна и когда вредна?",
+    "answer": "Кеширование результата чистой функции по аргументам. Полезно при дорогих вычислениях и повторяющихся аргументах. Вредно при редких повторах или большом потреблении памяти/быстро устаревающих данных.",
+    "tags": ["js", "memoization"]
+  },
+
+  {
+    "id": "async-001",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Композиция функций: что это и зачем?",
+    "answer": "Построение цепочки, где результат одной функции идёт во вход следующей. Даёт модульность, тестируемость, гибкость изменения логики.",
+    "tags": ["js", "composition"]
+  },
+  {
+    "id": "async-002",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Chaining: что это и где встречается?",
+    "answer": "Последовательный вызов методов, где каждый шаг возвращает объект/значение для продолжения цепочки. Есть в Promise then().then(), массивах map().filter().reduce().",
+    "tags": ["js", "chaining"]
+  },
+  {
+    "id": "async-003",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Генераторы: что это концептуально?",
+    "answer": "Функции, которые могут приостанавливать и продолжать выполнение, возвращают итератор. Полезны для пошаговой генерации и понимания истории async-абстракций.",
+    "tags": ["js", "generators"]
+  },
+  {
+    "id": "async-004",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Итераторы: что это и что на них построено?",
+    "answer": "Итератор знает текущее значение и done. На итераторах построены for...of, spread, структуры типа Map/Set/строки.",
+    "tags": ["js", "iterators"]
+  },
+  {
+    "id": "async-005",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Proxy: что это и зачем?",
+    "answer": "Proxy — обёртка для перехвата операций с объектом (get/set/delete/has/call…). Используется для валидации, логирования, реактивности, ограничений доступа.",
+    "tags": ["js", "proxy"]
+  },
+  {
+    "id": "async-006",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Асинхронность в JS: почему возможна при однопоточности?",
+    "answer": "JS однопоточен, но долгие операции не блокируют поток: результат обрабатывается позже. Асинхронность нужна для сетевых запросов, таймеров, событий. Это не многопоточность исполнения JS-кода.",
+    "tags": ["js", "async"]
+  },
+  {
+    "id": "async-007",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Event Loop: что делает (упрощённо)?",
+    "answer": "Выполняет основной код → микрозадачи → макрозадачи → обновление UI → повтор. Объясняет порядок setTimeout и Promise.",
+    "tags": ["js", "event-loop"]
+  },
+  {
+    "id": "async-008",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "Макрозадачи vs микрозадачи — правило приоритета?",
+    "answer": "После текущего стека сначала выполняются все микрозадачи (Promise.then/queueMicrotask/MutationObserver), и только потом следующая макрозадача (setTimeout, события...). Поэтому Promise часто «обгоняет» setTimeout.",
+    "tags": ["js", "event-loop", "microtasks"]
+  },
+  {
+    "id": "async-009",
+    "topicId": "async",
+    "topicTitle": "Async JS Base",
+    "question": "setTimeout vs setInterval и почему setTimeout(fn,0) не «сразу»?",
+    "answer": "setTimeout выполняет не раньше чем через X мс (может позже). setInterval может «накапливать» дрейф при долгой функции.\nsetTimeout(fn,0) — поставить в очередь макрозадач после текущего стека и микрозадач (не мгновенно).",
+    "tags": ["js", "timers"]
+  },
+
+  {
+    "id": "prom-001",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Состояния Promise и ключевой принцип неизменяемости?",
+    "answer": "3 состояния: pending → fulfilled или rejected. Promise меняет состояние только один раз и после этого неизменяем.",
+    "tags": ["js", "promise"]
+  },
+  {
+    "id": "prom-002",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "then/catch/finally: что делают и что возвращают?",
+    "answer": "then обрабатывает успех и всегда возвращает новый Promise. Вернул значение → fulfilled, бросил ошибку → rejected.\ncatch ловит ошибки (как then для rejected).\nfinally выполняется всегда, не получает результат и не меняет его (если сам не бросит ошибку).",
+    "tags": ["js", "promise"]
+  },
+  {
+    "id": "prom-003",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Цепочки Promise: как работают и как пробрасываются ошибки?",
+    "answer": "Каждый then ждёт результат предыдущего, ошибки автоматически «проваливаются» вниз до ближайшего catch. Это даёт линейное описание async-логики без callback hell.",
+    "tags": ["js", "promise", "chaining"]
+  },
+  {
+    "id": "prom-004",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "async/await: что делает async и что делает await?",
+    "answer": "async-функция всегда возвращает Promise.\nawait ждёт завершения Promise и при rejected ведёт себя как throw внутри async (не блокирует поток, блокирует только текущую async-функцию).",
+    "tags": ["js", "async", "await"]
+  },
+  {
+    "id": "prom-005",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Ошибки в async/await: как правильно обрабатывать?",
+    "answer": "Через try/catch. await «распаковывает» Promise: rejected → throw. Если не поймать — async-функция вернёт rejected Promise. Лучше не мешать .then() и await без причины.",
+    "tags": ["js", "async", "errors"]
+  },
+  {
+    "id": "prom-006",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Promise.all: поведение и когда использовать?",
+    "answer": "Запускает Promise параллельно, fulfilled только если все fulfilled. Если один rejected — весь all сразу rejected. Остальные не «отменяются», просто больше не ждутся.",
+    "tags": ["js", "promise", "all"]
+  },
+  {
+    "id": "prom-007",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Promise.allSettled: чем отличается от all?",
+    "answer": "Всегда fulfilled и возвращает результаты всех Promise со статусами fulfilled/rejected. Полезно, когда нужно дождаться всех, даже если часть упала.",
+    "tags": ["js", "promise", "allsettled"]
+  },
+  {
+    "id": "prom-008",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Promise.race: что возвращает и где применяют?",
+    "answer": "Завершается первым (и успех/и ошибка). Применение: таймауты, выбор самого быстрого источника. Остальные продолжают выполняться.",
+    "tags": ["js", "promise", "race"]
+  },
+  {
+    "id": "prom-009",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Promise.any: чем отличается от race?",
+    "answer": "Резолвится на первом успешном fulfilled. Rejected игнорирует. Если все rejected → AggregateError. race реагирует на первый результат вообще (включая ошибку).",
+    "tags": ["js", "promise", "any"]
+  },
+  {
+    "id": "prom-010",
+    "topicId": "promises",
+    "topicTitle": "Promises / async-await",
+    "question": "Последовательное vs параллельное async-выполнение — принцип выбора?",
+    "answer": "Если задачи независимы — запускать параллельно (быстрее). Последовательно только когда шаг 2 зависит от результата шага 1. Иначе это ошибка по производительности.",
+    "tags": ["js", "async", "performance"]
+  },
+
+  {
+    "id": "api-001",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "AbortController: зачем и что делает на самом деле?",
+    "answer": "API для отмены операций (часто fetch). controller.abort() говорит браузеру, что результат больше не нужен. Сервер не «останавливает», но браузер может прекратить обработку/дальнейшие шаги.",
+    "tags": ["browser", "abortcontroller", "fetch"]
+  },
+  {
+    "id": "api-002",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "Fetch API: что важно понимать про ошибки 4xx/5xx?",
+    "answer": "fetch резолвится, когда получен HTTP-ответ. 4xx/5xx не делают Promise rejected: это fulfilled, но response.ok === false. rejected — это сетевые ошибки.",
+    "tags": ["browser", "fetch"]
+  },
+  {
+    "id": "api-003",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "Streaming response: что это и зачем?",
+    "answer": "Чтение ответа по частям, не дожидаясь полной загрузки. Полезно для больших файлов/потоковых данных, прогресса и меньшего потребления памяти.",
+    "tags": ["browser", "streaming"]
+  },
+  {
+    "id": "api-004",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "Debounce vs Throttle: разница по смыслу и кейсы?",
+    "answer": "Debounce: выполнить один раз после паузы (input/search).\nThrottle: выполнять не чаще чем раз в N времени (scroll/resize/mousemove).",
+    "tags": ["browser", "performance"]
+  },
+  {
+    "id": "api-005",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "UI freeze и long tasks: почему интерфейс «виснет» и что делать на уровне идей?",
+    "answer": "UI виснет, когда main thread занят слишком долго (long task ~50ms+): тяжёлые вычисления, большие циклы, сложные sync операции, плохая работа с DOM.\nИдеи решения: дробить задачи, Web Workers, requestAnimationFrame, оптимизировать алгоритмы.",
+    "tags": ["browser", "performance", "long-tasks"]
+  },
+  {
+    "id": "api-006",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "Web Workers: что дают и какие ограничения?",
+    "answer": "Выполняют JS вне main thread → UI не фризится. Нет доступа к DOM/window/document. Общение только сообщениями.",
+    "tags": ["browser", "workers"]
+  },
+  {
+    "id": "api-007",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "postMessage в контексте worker: как работает и почему нет ссылок?",
+    "answer": "Единственный способ общения main ↔ worker. Данные передаются сообщениями (копирование), чтобы избежать гонок и сохранить безопасность/предсказуемость. Большие данные могут быть дорогими (есть transferable на уровне концепции).",
+    "tags": ["browser", "workers", "postmessage"]
+  },
+  {
+    "id": "api-008",
+    "topicId": "browser-api",
+    "topicTitle": "Browser APIs",
+    "question": "requestAnimationFrame: зачем и чем отличается от setTimeout?",
+    "answer": "Вызывает коллбек перед следующей перерисовкой кадра, синхронизирован с рендерингом. setTimeout не знает про кадры. rAF лучший для анимаций/визуальных обновлений.",
+    "tags": ["browser", "raf"]
+  },
+
+  {
+    "id": "dom-001",
+    "topicId": "dom",
+    "topicTitle": "DOM / Events",
+    "question": "DOM: что это концептуально и почему частые изменения опасны?",
+    "answer": "DOM — объектное дерево документа в памяти (не строка HTML). Изменения DOM могут вызывать перерасчёт стилей/лейаута/перерисовку → проблемы с производительностью при частых изменениях.",
+    "tags": ["dom"]
+  },
+  {
+    "id": "dom-002",
+    "topicId": "dom",
+    "topicTitle": "DOM / Events",
+    "question": "querySelector vs querySelectorAll: что возвращают и важный нюанс про обновление результата?",
+    "answer": "querySelector — первый элемент или null. querySelectorAll — NodeList (0+), итерируемый. Результат обычно статический: при изменении DOM нужно искать заново.",
+    "tags": ["dom", "selectors"]
+  },
+  {
+    "id": "dom-003",
+    "topicId": "dom",
+    "topicTitle": "DOM / Events",
+    "question": "innerHTML vs innerText vs textContent: разница и безопасность?",
+    "answer": "innerHTML — вставка HTML, риск XSS.\ninnerText — видимый текст, может быть медленнее (учёт CSS).\ntextContent — весь текст, быстрее, безопаснее для вставки текста.\nПравило: нужен текст → textContent; нужен HTML → innerHTML осознанно.",
+    "tags": ["dom", "xss"]
+  },
+  {
+    "id": "dom-004",
+    "topicId": "dom",
+    "topicTitle": "DOM / Events",
+    "question": "Позиционирование: static/relative/absolute/fixed/sticky — в чём смысл?",
+    "answer": "static — обычный поток.\nrelative — в потоке, можно смещать; якорь для absolute.\nabsolute — вне потока, относительно ближайшего position != static (или документа).\nfixed — относительно окна.\nsticky — как relative, но «прилипает» после порога.",
+    "tags": ["css", "position"]
+  },
+  {
+    "id": "events-001",
+    "topicId": "events",
+    "topicTitle": "DOM Events",
+    "question": "Event bubbling: что это и зачем нужно?",
+    "answer": "Событие всплывает от целевого элемента к родителям. Даёт делегирование событий и уменьшает количество обработчиков.",
+    "tags": ["events", "bubbling"]
+  },
+  {
+    "id": "events-002",
+    "topicId": "events",
+    "topicTitle": "DOM Events",
+    "question": "Event capturing: что это и фазы событий?",
+    "answer": "Capturing идёт сверху вниз до target, затем target phase, затем bubbling снизу вверх. Capturing используют реже, но важно знать модель фаз.",
+    "tags": ["events", "capturing"]
+  },
+  {
+    "id": "events-003",
+    "topicId": "events",
+    "topicTitle": "DOM Events",
+    "question": "stopPropagation vs stopImmediatePropagation — разница?",
+    "answer": "stopPropagation останавливает дальнейшее распространение по DOM, но другие обработчики на этом же элементе продолжат.\nstopImmediatePropagation останавливает и распространение, и остальные обработчики на этом элементе.",
+    "tags": ["events"]
+  },
+  {
+    "id": "events-004",
+    "topicId": "events",
+    "topicTitle": "DOM Events",
+    "question": "preventDefault: что отменяет и чем отличается от stopPropagation?",
+    "answer": "preventDefault отменяет стандартное действие браузера (переход по ссылке, submit формы и т.д.).\nstopPropagation — про распространение события по DOM.",
+    "tags": ["events"]
+  },
+  {
+    "id": "events-005",
+    "topicId": "events",
+    "topicTitle": "DOM Events",
+    "question": "this в event handler: обычная функция vs стрелка?",
+    "answer": "Обычная функция: this часто указывает на элемент, на котором висит handler.\nСтрелка: this берётся из внешнего контекста, обычно не DOM-элемент → частая путаница.",
+    "tags": ["events", "this"]
+  },
+  {
+    "id": "events-006",
+    "topicId": "events",
+    "topicTitle": "DOM Events",
+    "question": "Event delegation: что это и почему важно?",
+    "answer": "Один обработчик на родителе вместо множества на детях. Основано на bubbling. Плюсы: меньше памяти, работает с динамическими элементами, проще логика списков/таблиц.",
+    "tags": ["events", "delegation"]
+  },
+
+  {
+    "id": "perf-001",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "async vs defer: в чём разница и что чаще используют для основного JS?",
+    "answer": "async: загрузка параллельно, выполняется сразу после загрузки, порядок не гарантирован.\ndefer: загрузка параллельно, выполняется после парсинга HTML, порядок сохраняется.\nОбычно основной JS — defer.",
+    "tags": ["html", "scripts"]
+  },
+  {
+    "id": "perf-002",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "LocalStorage vs SessionStorage — отличия и ограничения?",
+    "answer": "LocalStorage живёт долго и доступен во всех вкладках одного origin.\nSessionStorage живёт в рамках вкладки и очищается при закрытии.\nОба: синхронные, хранят строки, не для чувствительных данных.",
+    "tags": ["storage"]
+  },
+  {
+    "id": "perf-003",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "Ограничения browser storage и риски безопасности?",
+    "answer": "Обычно 5–10MB на origin. Доступ только в рамках origin. Данные легко смотреть в DevTools. storage доступен из JS → при XSS можно украсть.",
+    "tags": ["storage", "security"]
+  },
+  {
+    "id": "perf-004",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "Cookie vs Storage: ключевой вывод выбора для auth и состояния?",
+    "answer": "Cookie — часть HTTP и уходят с каждым запросом; есть HttpOnly/Secure/SameSite → подходят для auth.\nStorage — не отправляется автоматически, проще, но уязвим к XSS.\nВывод: auth → cookie, клиентское состояние → storage.",
+    "tags": ["cookies", "storage", "auth"]
+  },
+  {
+    "id": "perf-005",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "Почему важно чистить listeners и intervals в SPA?",
+    "answer": "Если не снять listener/не очистить interval — остаются ссылки → GC не освобождает память, логика работает «в никуда», возможны утечки и лишняя нагрузка.",
+    "tags": ["memory-leak", "spa"]
+  },
+  {
+    "id": "perf-006",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "ResizeObserver: что решает и почему тоже нужно отключать?",
+    "answer": "Следит за изменениями размеров конкретного элемента (не только окна). Полезен для адаптивных компонентов и динамических layout. Observer нужно отключать, иначе лишние вычисления/утечки.",
+    "tags": ["browser", "observer"]
+  },
+  {
+    "id": "perf-007",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "IntersectionObserver: зачем и где применяют?",
+    "answer": "Отслеживает появление/исчезновение элемента в viewport/контейнере. Кейс: lazy loading, бесконечный скролл, аналитика видимости. Нужно отключать при ненадобности.",
+    "tags": ["browser", "observer"]
+  },
+  {
+    "id": "perf-008",
+    "topicId": "perf",
+    "topicTitle": "Storage / Performance",
+    "question": "Web Vitals: LCP/CLS/INP — что измеряют и от чего страдают?",
+    "answer": "LCP — скорость появления крупнейшего элемента (картинки, блокирующий JS, медленный сервер).\nCLS — «прыжки» layout (картинки без размеров, динамический контент, шрифты).\nINP — отзывчивость на действия (long tasks, тяжёлые handlers, перегруз main thread).",
+    "tags": ["performance", "web-vitals"]
+  },
+
+  {
+    "id": "css-001",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "CSS Box Model: из чего состоит и типичная ошибка с width/height?",
+    "answer": "content + padding + border + margin. Типичная ошибка: задать width и добавить padding/border → элемент станет больше ожидаемого.",
+    "tags": ["css", "box-model"]
+  },
+  {
+    "id": "css-002",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "box-sizing: border-box — что меняет и почему его ставят глобально?",
+    "answer": "border-box включает padding и border в width/height → размеры предсказуемы, меньше багов верстки. Поэтому часто задают глобально.",
+    "tags": ["css", "box-sizing"]
+  },
+  {
+    "id": "css-003",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "Центрирование: почему нет одного универсального способа?",
+    "answer": "Нужно понять контекст: по горизонтали/вертикали, один элемент/группа, внутри блока/страницы. Часто решают flex/grid/margin auto.",
+    "tags": ["css", "layout"]
+  },
+  {
+    "id": "css-004",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "Flexbox: ключевая идея и ограничение?",
+    "answer": "Модель распределения по одной оси (главная/поперечная). Отлично для выравнивания и адаптивных рядов/колонок. Для двухмерных сеток лучше Grid.",
+    "tags": ["css", "flexbox"]
+  },
+  {
+    "id": "css-005",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "CSS Grid: чем отличается от flexbox и когда лучше?",
+    "answer": "Grid — двухмерная сетка (строки и колонки одновременно) и управление структурой layout. Flexbox — одна ось и выравнивание. Часто используются вместе.",
+    "tags": ["css", "grid"]
+  },
+  {
+    "id": "css-006",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "Responsive layout: идея и инструменты?",
+    "answer": "Адаптация под разные экраны без отдельной «мобильной версии»: гибкие размеры, media queries, flex/grid, относительные единицы. Важно: не только ширина, но устройства/ориентации/плотность пикселей.",
+    "tags": ["css", "responsive"]
+  },
+  {
+    "id": "css-007",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "px vs em vs rem — когда что использовать?",
+    "answer": "px — абсолютная, предсказуемая, но хуже масштабируется.\nem — от font-size родителя (может «накапливаться»).\nrem — от корневого font-size, удобно масштабировать весь интерфейс.\nПрактика: rem для UI, em локально, px точечно.",
+    "tags": ["css", "units"]
+  },
+  {
+    "id": "css-008",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "Семантическая вёрстка: зачем и примеры тегов?",
+    "answer": "HTML про структуру и смысл, CSS про внешний вид. Семантика улучшает доступность, SEO и поддержку. Примеры: header/footer/main/section/article/nav/aside.",
+    "tags": ["html", "semantic"]
+  },
+  {
+    "id": "css-009",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "CSS prefixes: что это и почему сейчас редко пишут руками?",
+    "answer": "Вендорные префиксы для экспериментальных свойств (-webkit-, -moz-...). Сейчас редко вручную: стабильнее стандарты, а префиксы обычно добавляет сборка.",
+    "tags": ["css", "prefixes"]
+  },
+  {
+    "id": "css-010",
+    "topicId": "css",
+    "topicTitle": "CSS / Layout",
+    "question": "Autoprefixer: что делает и от чего зависит?",
+    "answer": "Автоматически добавляет нужные CSS-префиксы на этапе сборки, ориентируясь на целевые браузеры (настройки поддержки).",
+    "tags": ["css", "tooling"]
+  },
+
+  {
+    "id": "tool-001",
+    "topicId": "tooling",
+    "topicTitle": "Tooling / Git / CI",
+    "question": "Bundlers (webpack/vite): зачем нужны и разница подхода dev/prod?",
+    "answer": "Бандлер собирает модули в бандлы для браузера, трансформирует код, оптимизирует размер и ассеты.\nwebpack: классическая сборка заранее.\nvite: dev через native ESM, prod — сборка.",
+    "tags": ["tooling", "bundler"]
+  },
+  {
+    "id": "tool-002",
+    "topicId": "tooling",
+    "topicTitle": "Tooling / Git / CI",
+    "question": "Dev vs Prod сборка: ключевые различия?",
+    "answer": "Dev: скорость разработки, неминифицировано, sourcemaps, быстрые пересборки.\nProd: производительность, минификация, tree-shaking, оптимизация ассетов, отключение dev-инструментов.",
+    "tags": ["tooling", "build"]
+  },
+  {
+    "id": "tool-003",
+    "topicId": "tooling",
+    "topicTitle": "Tooling / Git / CI",
+    "question": "Source maps: зачем и нюансы в продакшене?",
+    "answer": "Показывают соответствие исходного и собранного кода для отладки и stack trace. В проде могут отключать/хранить отдельно — баланс удобства и безопасности/размера.",
+    "tags": ["tooling", "sourcemaps"]
+  },
+  {
+    "id": "tool-004",
+    "topicId": "tooling",
+    "topicTitle": "Tooling / Git / CI",
+    "question": "npm install vs npm ci — когда что?",
+    "answer": "npm install читает package.json и может менять lock — удобно локально.\nnpm ci ставит строго по package-lock, не меняет его и чистит node_modules — идеально для CI и повторяемых сборок.",
+    "tags": ["npm", "ci"]
+  },
+  {
+    "id": "tool-005",
+    "topicId": "tooling",
+    "topicTitle": "Tooling / Git / CI",
+    "question": "package-lock.json: зачем нужен и что фиксирует?",
+    "answer": "Фиксирует точные версии всей зависимости цепочки. package.json — что разрешено, lock — что фактически установлено. Нужен для одинаковых версий у всех и воспроизводимых сборок.",
+    "tags": ["npm", "lockfile"]
+  },
+  {
+    "id": "git-001",
+    "topicId": "git",
+    "topicTitle": "Git",
+    "question": "git fetch vs git pull — разница?",
+    "answer": "fetch скачивает изменения и обновляет ссылки origin/*, но не меняет текущую ветку.\npull = fetch + merge/rebase и сразу применяет изменения к текущей ветке.",
+    "tags": ["git"]
+  },
+  {
+    "id": "git-002",
+    "topicId": "git",
+    "topicTitle": "Git",
+    "question": "git merge vs git rebase — концептуальная разница и правило?",
+    "answer": "merge создаёт merge-коммит и сохраняет историю ветвления (безопаснее для команды).\nrebase переписывает историю и делает её линейной (опасно на общих ветках).\nПравило: rebase локально, merge для общих веток.",
+    "tags": ["git"]
+  },
+  {
+    "id": "git-003",
+    "topicId": "git",
+    "topicTitle": "Git",
+    "question": "Staging area (index): зачем нужен?",
+    "answer": "Промежуточный слой: ты явно выбираешь, какие изменения попадут в коммит. Коммит берёт только то, что в staging. Это основа аккуратных коммитов и работы в команде.",
+    "tags": ["git", "staging"]
+  },
+  {
+    "id": "git-004",
+    "topicId": "git",
+    "topicTitle": "Git",
+    "question": "Конфликты из-за EOL (LF vs CRLF): почему бывают и как решают (на уровне идеи)?",
+    "answer": "Разные ОС/настройки дают разные концы строк → git видит «изменения» и конфликты. Решают единым форматом в проекте и настройками git/editor на нормализацию.",
+    "tags": ["git", "eol"]
+  },
+  {
+    "id": "ci-001",
+    "topicId": "ci",
+    "topicTitle": "CI/CD",
+    "question": "CI/CD: что такое и разница Delivery vs Deployment?",
+    "answer": "CI — автоматические сборки/тесты/линтеры при изменениях.\nCD — доставка/деплой. Delivery: код готов к выкладке (ручной шаг). Deployment: выкладывается автоматически.",
+    "tags": ["ci", "cd"]
   }
 ]

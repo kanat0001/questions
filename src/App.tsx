@@ -6,6 +6,8 @@ import { makeTopics, normalize, shuffle, STATUS_LABEL } from "./utils";
 
 type Mode = "list" | "train";
 const ALL_TOPICS_ID = "__all__";
+const THEME_KEY = "qa-trainer-theme-v1";
+type Theme = "light" | "dark";
 
 function getStatus(progress: ProgressMap, id: string): LearnStatus {
   return progress[id] ?? "unlearned";
@@ -13,6 +15,19 @@ function getStatus(progress: ProgressMap, id: string): LearnStatus {
 
 function statusBadge(status: LearnStatus) {
   return <span className="badge">{STATUS_LABEL[status]}</span>;
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+}
+
+function getInitialTheme(): Theme {
+  const saved = localStorage.getItem(THEME_KEY) as Theme | null;
+  if (saved === "light" || saved === "dark") return saved;
+
+  // если не сохраняли — берём из системной
+  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+  return prefersDark ? "dark" : "light";
 }
 
 export default function App() {
@@ -37,9 +52,17 @@ export default function App() {
   const [topicsOpen, setTopicsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  // theme
+  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
+
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
+
+  useEffect(() => {
+    applyTheme(theme);
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
 
   const topics = useMemo(() => makeTopics(questions, progress), [questions, progress]);
 
@@ -83,7 +106,6 @@ export default function App() {
     setTrainIndex(0);
     setTrainShowAnswer(false);
     setMode("train");
-    // закрыть панели, чтобы не мешали
     setTopicsOpen(false);
     setSettingsOpen(false);
   };
@@ -254,7 +276,6 @@ export default function App() {
 
   return (
     <div className="container">
-      {/* Overlay */}
       {(topicsOpen || settingsOpen) && <div className="overlay" onClick={closeAll} />}
 
       {/* Topics drawer */}
@@ -322,6 +343,19 @@ export default function App() {
         </div>
 
         <div className="card">
+          <div className="rowBetween">
+            <div className="muted small">Тема</div>
+            <button
+              className="button"
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? "🌙 Dark" : "☀️ Light"}
+            </button>
+          </div>
+        </div>
+
+        <div className="card">
           <div className="muted small" style={{ marginBottom: 8 }}>Поиск</div>
           <input
             className="input"
@@ -375,7 +409,7 @@ export default function App() {
         </div>
       </aside>
 
-      {/* Main: только минимальная панель + вопросы */}
+      {/* Main */}
       <main className="main">
         <div className="topBar">
           <button className="button" onClick={() => { setTopicsOpen(true); setSettingsOpen(false); }}>
@@ -385,7 +419,7 @@ export default function App() {
           <div className="topInfo">
             <span className="badge">{selectedTopicTitle}</span>
             <span className="badge">{filteredQuestions.length} шт.</span>
-            <span className="badge">{overall.percent}% всего</span>
+            <span className="badge">{overall.percent}%</span>
           </div>
 
           <button className="button" onClick={() => { setSettingsOpen(true); setTopicsOpen(false); }}>
