@@ -1,0 +1,42 @@
+[
+  {
+    "id": "js-closure-1",
+    "topicId": "js",
+    "topicTitle": "JavaScript",
+    "question": "Что такое замыкание?",
+    "answer": "Замыкание — это функция вместе с окружением (лексической областью видимости), в котором она была создана. Благодаря этому функция может обращаться к переменным из внешней области даже после завершения внешней функции.",
+    "tags": ["functions", "scope"]
+  },
+  {
+    "id": "js-this-1",
+    "topicId": "js",
+    "topicTitle": "JavaScript",
+    "question": "Как работает this в JavaScript?",
+    "answer": "this определяется способом вызова функции (call-site). В обычной функции: зависит от контекста вызова; в стрелочной: this берётся из внешней области (лексически). Методы call/apply/bind позволяют задать this явно.",
+    "tags": ["this", "functions"]
+  },
+  {
+    "id": "react-keys-1",
+    "topicId": "react",
+    "topicTitle": "React",
+    "question": "Зачем нужны keys в списках?",
+    "answer": "Keys помогают React сопоставлять элементы между рендерами и эффективно обновлять DOM. Ключ должен быть стабильным и уникальным (например id), чтобы избежать лишних перемонтирований и багов состояния.",
+    "tags": ["lists", "reconciliation"]
+  },
+  {
+    "id": "ts-never-1",
+    "topicId": "ts",
+    "topicTitle": "TypeScript",
+    "question": "Что такое never и где полезен?",
+    "answer": "never — тип для значений, которые никогда не происходят (ошибка/бесконечный цикл). Полезен для exhaustiveness-check в switch по union и для функций, которые всегда бросают ошибку.",
+    "tags": ["types", "unions"]
+  },
+  {
+    "id": "webpack-loaders-1",
+    "topicId": "webpack",
+    "topicTitle": "Webpack",
+    "question": "Зачем нужны loaders в Webpack?",
+    "answer": "Loaders преобразуют файлы до того, как они попадут в бандл: например, TS/JS через babel/ts-loader, CSS через css-loader, изображения через asset modules и т.д.",
+    "tags": ["bundling", "build"]
+  }
+]
