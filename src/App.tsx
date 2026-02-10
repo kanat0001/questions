@@ -5,7 +5,6 @@ import { loadProgress, resetProgress, setStatus } from "./storage";
 import { makeTopics, normalize, shuffle, STATUS_LABEL } from "./utils";
 
 type Mode = "list" | "train";
-
 const ALL_TOPICS_ID = "__all__";
 
 function getStatus(progress: ProgressMap, id: string): LearnStatus {
@@ -26,18 +25,17 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<LearnStatus | "all">("all");
 
   const [mode, setMode] = useState<Mode>("list");
-
-  // list mode: раскрытые ответы
   const [openAnswer, setOpenAnswer] = useState<Record<string, boolean>>({});
 
-  // training mode state
+  // training mode
   const [trainOrder, setTrainOrder] = useState<string[]>([]);
   const [trainIndex, setTrainIndex] = useState(0);
   const [trainShowAnswer, setTrainShowAnswer] = useState(false);
   const [trainShuffle, setTrainShuffle] = useState(true);
 
-  // mobile sidebar drawer
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // focus UI: drawers
+  const [topicsOpen, setTopicsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     setProgress(loadProgress());
@@ -85,6 +83,9 @@ export default function App() {
     setTrainIndex(0);
     setTrainShowAnswer(false);
     setMode("train");
+    // закрыть панели, чтобы не мешали
+    setTopicsOpen(false);
+    setSettingsOpen(false);
   };
 
   const currentTrainItem = useMemo(() => {
@@ -103,11 +104,19 @@ export default function App() {
     setProgress(resetProgress());
     setOpenAnswer({});
     setMode("list");
+    setTrainOrder([]);
+    setTrainIndex(0);
+    setTrainShowAnswer(false);
   };
 
   const pickTopic = (topicId: string) => {
     setSelectedTopicId(topicId);
-    setSidebarOpen(false);
+    setTopicsOpen(false);
+  };
+
+  const closeAll = () => {
+    setTopicsOpen(false);
+    setSettingsOpen(false);
   };
 
   const renderList = () => {
@@ -138,7 +147,7 @@ export default function App() {
               className="button"
               onClick={() => setOpenAnswer((prev) => ({ ...prev, [q.id]: !prev[q.id] }))}
             >
-              {isOpen ? "Скрыть ответ" : "Показать ответ"}
+              {isOpen ? "Скрыть" : "Ответ"}
             </button>
           </div>
 
@@ -167,10 +176,10 @@ export default function App() {
           <p className="qTitle">Тренировка завершена 🎉</p>
           <div className="actions">
             <button className="button" onClick={() => setMode("list")}>
-              Назад к списку
+              Назад
             </button>
             <button className="button primary" onClick={startTraining} disabled={filteredQuestions.length === 0}>
-              Начать заново
+              Заново
             </button>
           </div>
         </div>
@@ -183,10 +192,7 @@ export default function App() {
 
     const next = () => {
       setTrainShowAnswer(false);
-      setTrainIndex((i) => {
-        const ni = i + 1;
-        return ni >= trainOrder.length ? i : ni;
-      });
+      setTrainIndex((i) => Math.min(trainOrder.length - 1, i + 1));
     };
 
     const prev = () => {
@@ -213,7 +219,7 @@ export default function App() {
           </div>
 
           <button className="button" onClick={() => setTrainShowAnswer((s) => !s)}>
-            {trainShowAnswer ? "Скрыть ответ" : "Показать ответ"}
+            {trainShowAnswer ? "Скрыть" : "Ответ"}
           </button>
         </div>
 
@@ -239,7 +245,7 @@ export default function App() {
           </button>
 
           <button className="button" onClick={() => setMode("list")}>
-            Выйти из тренировки
+            Выйти
           </button>
         </div>
       </div>
@@ -248,16 +254,14 @@ export default function App() {
 
   return (
     <div className="container">
-      {/* Mobile overlay */}
-      {sidebarOpen && <div className="overlay" onClick={() => setSidebarOpen(false)} />}
+      {/* Overlay */}
+      {(topicsOpen || settingsOpen) && <div className="overlay" onClick={closeAll} />}
 
-      {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <div className="sidebarHeader">
-          <h1 className="h1">QA Trainer</h1>
-          <button className="button" onClick={() => setSidebarOpen(false)}>
-            Закрыть
-          </button>
+      {/* Topics drawer */}
+      <aside className={`drawer drawerLeft ${topicsOpen ? "open" : ""}`}>
+        <div className="drawerHeader">
+          <div className="drawerTitle">Темы</div>
+          <button className="button" onClick={() => setTopicsOpen(false)}>Закрыть</button>
         </div>
 
         <div className="card">
@@ -310,20 +314,25 @@ export default function App() {
         ))}
       </aside>
 
-      {/* Main */}
-      <section className="main">
-        <div className="toolbar">
-          <button className="button mobileOnly" onClick={() => setSidebarOpen(true)}>
-            Темы
-          </button>
+      {/* Settings drawer */}
+      <aside className={`drawer drawerRight ${settingsOpen ? "open" : ""}`}>
+        <div className="drawerHeader">
+          <div className="drawerTitle">Настройки</div>
+          <button className="button" onClick={() => setSettingsOpen(false)}>Закрыть</button>
+        </div>
 
+        <div className="card">
+          <div className="muted small" style={{ marginBottom: 8 }}>Поиск</div>
           <input
             className="input"
             placeholder="Поиск по вопросам (или тегам)…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+        </div>
 
+        <div className="card">
+          <div className="muted small" style={{ marginBottom: 8 }}>Фильтр статуса</div>
           <select
             className="select"
             value={statusFilter}
@@ -335,30 +344,57 @@ export default function App() {
             <option value="learned">Выучено</option>
           </select>
 
-          <label className="badge" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <label className="badge" style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 10 }}>
             <input
               type="checkbox"
               checked={trainShuffle}
               onChange={(e) => setTrainShuffle(e.target.checked)}
             />
-            Рандом
+            Рандом в тренировке
           </label>
+        </div>
 
-          <button className="button primary" onClick={startTraining} disabled={filteredQuestions.length === 0}>
-            Тренировка
+        <div className="card">
+          <div className="actions">
+            <button className="button primary" onClick={startTraining} disabled={filteredQuestions.length === 0}>
+              Тренировка
+            </button>
+            <button className="button" onClick={() => setMode("list")}>Список</button>
+            <button className="button danger" onClick={onReset}>Сброс прогресса</button>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="muted small">
+            Тема: <b>{selectedTopicTitle}</b>
+            <br />
+            Видимых: <b>{filteredQuestions.length}</b>
+            <br />
+            Режим: <b>{mode === "train" ? "тренировка" : "список"}</b>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main: только минимальная панель + вопросы */}
+      <main className="main">
+        <div className="topBar">
+          <button className="button" onClick={() => { setTopicsOpen(true); setSettingsOpen(false); }}>
+            Темы
           </button>
 
-          <button className="button danger" onClick={onReset}>
-            Сброс
-          </button>
+          <div className="topInfo">
+            <span className="badge">{selectedTopicTitle}</span>
+            <span className="badge">{filteredQuestions.length} шт.</span>
+            <span className="badge">{overall.percent}% всего</span>
+          </div>
 
-          <span className="badge toolbarInfo">
-            {selectedTopicTitle} • {filteredQuestions.length} шт. • {mode === "train" ? "Тренировка" : "Список"}
-          </span>
+          <button className="button" onClick={() => { setSettingsOpen(true); setTopicsOpen(false); }}>
+            Настройки
+          </button>
         </div>
 
         <div className="content">{mode === "train" ? renderTraining() : renderList()}</div>
-      </section>
+      </main>
     </div>
   );
 }
