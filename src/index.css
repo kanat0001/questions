@@ -1,7 +1,3 @@
-body{
-  margin: 0;
-  padding: 0;
-}
 :root {
   font-family: Inter, system-ui, Arial, sans-serif;
   color: #111;
@@ -10,14 +6,14 @@ body{
 
 * { box-sizing: border-box; }
 
-body { margin: 0; }
-
-a { color: inherit; }
+html, body, #root { height: 100%; }
+body { margin: 0; overflow: hidden; } /* скролл НЕ у body */
 
 .container {
-  height: 100vh;
+  height: 100dvh; /* лучше для мобилки, чем 100vh */
   display: grid;
   grid-template-columns: 280px 1fr;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -25,42 +21,58 @@ a { color: inherit; }
   border-right: 1px solid #e6e8f0;
   padding: 16px;
   overflow: auto;
+  height: 100%;
+}
+
+.sidebarHeader {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .main {
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
+  min-width: 0;
 }
 
 .toolbar {
   background: white;
   border-bottom: 1px solid #e6e8f0;
-  padding: 12px 16px;
+  padding: 10px 12px;
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .content {
-  padding: 16px;
-  overflow: auto;
+  padding: 12px;
+  overflow: auto;     /* скролл только тут */
+  min-height: 0;
 }
 
 .h1 {
   font-size: 16px;
-  font-weight: 700;
-  margin: 0 0 12px;
+  font-weight: 800;
+  margin: 0;
 }
 
 .muted { color: #5b6476; }
+
 .badge {
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 999px;
   border: 1px solid #e6e8f0;
   background: #fbfcff;
+  white-space: nowrap;
 }
 
 .input, .select, .button {
@@ -73,7 +85,7 @@ a { color: inherit; }
 
 .input { min-width: 260px; flex: 1; }
 .select { min-width: 180px; }
-.button { cursor: pointer; font-weight: 600; }
+.button { cursor: pointer; font-weight: 700; }
 .button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .button.primary {
@@ -87,6 +99,7 @@ a { color: inherit; }
   border-color: #ffd0d0;
 }
 
+/* темы */
 .topicItem {
   border: 1px solid #e6e8f0;
   background: #fbfcff;
@@ -101,12 +114,14 @@ a { color: inherit; }
   background: #111;
   color: white;
 }
+
 .topicRow {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   align-items: baseline;
 }
+
 .progressLine {
   height: 8px;
   border-radius: 999px;
@@ -114,11 +129,13 @@ a { color: inherit; }
   overflow: hidden;
   margin-top: 10px;
 }
+
 .progressFill {
   height: 100%;
   background: #111;
 }
 
+/* карточки */
 .card {
   background: white;
   border: 1px solid #e6e8f0;
@@ -133,13 +150,25 @@ a { color: inherit; }
   gap: 12px;
   align-items: flex-start;
 }
-.qTitle { font-weight: 700; margin: 0; }
+
+.cardTopLeft {
+  min-width: 0;
+  flex: 1;
+}
+
+.qTitle {
+  font-weight: 800;
+  margin: 0;
+  word-break: break-word;
+}
+
 .answer {
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid #eef0f6;
   white-space: pre-wrap;
 }
+
 .actions {
   display: flex;
   gap: 8px;
@@ -148,13 +177,37 @@ a { color: inherit; }
 }
 
 .small { font-size: 12px; }
-.grid2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
+
+.overlay { display: none; }
+.mobileOnly { display: none; }
+.toolbarInfo { margin-left: auto; }
+
+/* -------- Мобильная версия: sidebar как drawer -------- */
 @media (max-width: 860px) {
   .container { grid-template-columns: 1fr; }
-  .sidebar { height: auto; border-right: none; border-bottom: 1px solid #e6e8f0; }
-  .input { min-width: 160px; }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    z-index: 20;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    transform: translateX(-105%);
+    transition: transform .2s ease;
+    border-right: none;
+    padding: 16px;
+  }
+
+  .sidebar.open { transform: translateX(0); }
+  .mobileOnly { display: inline-flex; }
+
+  .input { min-width: 100%; }
+  .select { flex: 1; min-width: 160px; }
+  .toolbarInfo { width: 100%; margin-left: 0; }
 }

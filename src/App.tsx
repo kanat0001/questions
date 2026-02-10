@@ -36,6 +36,9 @@ export default function App() {
   const [trainShowAnswer, setTrainShowAnswer] = useState(false);
   const [trainShuffle, setTrainShuffle] = useState(true);
 
+  // mobile sidebar drawer
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
@@ -102,6 +105,11 @@ export default function App() {
     setMode("list");
   };
 
+  const pickTopic = (topicId: string) => {
+    setSelectedTopicId(topicId);
+    setSidebarOpen(false);
+  };
+
   const renderList = () => {
     if (filteredQuestions.length === 0) {
       return (
@@ -118,7 +126,7 @@ export default function App() {
       return (
         <div className="card" key={q.id}>
           <div className="cardTop">
-            <div>
+            <div className="cardTopLeft">
               <p className="qTitle">{q.question}</p>
               <div className="muted small">
                 {q.topicTitle} • {statusBadge(st)}
@@ -197,7 +205,7 @@ export default function App() {
     return (
       <div className="card">
         <div className="cardTop">
-          <div>
+          <div className="cardTopLeft">
             <p className="qTitle">{currentTrainItem.question}</p>
             <div className="muted small">
               {currentTrainItem.topicTitle} • {statusBadge(st)} • {idxHuman}/{total}
@@ -240,9 +248,17 @@ export default function App() {
 
   return (
     <div className="container">
+      {/* Mobile overlay */}
+      {sidebarOpen && <div className="overlay" onClick={() => setSidebarOpen(false)} />}
+
       {/* Sidebar */}
-      <aside className="sidebar">
-        <h1 className="h1">QA Trainer</h1>
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div className="sidebarHeader">
+          <h1 className="h1">QA Trainer</h1>
+          <button className="button" onClick={() => setSidebarOpen(false)}>
+            Закрыть
+          </button>
+        </div>
 
         <div className="card">
           <div className="topicRow">
@@ -261,7 +277,7 @@ export default function App() {
 
         <div
           className={`topicItem ${selectedTopicId === ALL_TOPICS_ID ? "active" : ""}`}
-          onClick={() => setSelectedTopicId(ALL_TOPICS_ID)}
+          onClick={() => pickTopic(ALL_TOPICS_ID)}
           role="button"
           tabIndex={0}
         >
@@ -276,7 +292,7 @@ export default function App() {
           <div
             key={t.id}
             className={`topicItem ${selectedTopicId === t.id ? "active" : ""}`}
-            onClick={() => setSelectedTopicId(t.id)}
+            onClick={() => pickTopic(t.id)}
             role="button"
             tabIndex={0}
           >
@@ -297,6 +313,10 @@ export default function App() {
       {/* Main */}
       <section className="main">
         <div className="toolbar">
+          <button className="button mobileOnly" onClick={() => setSidebarOpen(true)}>
+            Темы
+          </button>
+
           <input
             className="input"
             placeholder="Поиск по вопросам (или тегам)…"
@@ -329,13 +349,12 @@ export default function App() {
           </button>
 
           <button className="button danger" onClick={onReset}>
-            Сброс прогресса
+            Сброс
           </button>
 
-          <span className="badge">
-            {selectedTopicTitle} • {filteredQuestions.length} шт.
+          <span className="badge toolbarInfo">
+            {selectedTopicTitle} • {filteredQuestions.length} шт. • {mode === "train" ? "Тренировка" : "Список"}
           </span>
-          <span className="badge">{mode === "train" ? "Режим: тренировка" : "Режим: список"}</span>
         </div>
 
         <div className="content">{mode === "train" ? renderTraining() : renderList()}</div>
